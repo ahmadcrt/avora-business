@@ -1,0 +1,11 @@
+.home-hero {
+  display: grid;
+  gap: var(--space-7);
+  align-items: center;
+  padding-block: var(--space-7);
+}
+.home-hero__mark { width: min(60%, 14rem); height: auto; justify-self: center; }
+@media (min-width: 48em) {
+  .home-hero { grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); padding-block: var(--space-8); }
+  .home-hero__mark { width: min(100%, 18rem); }
+}
