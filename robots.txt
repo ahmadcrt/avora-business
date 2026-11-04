@@ -1,0 +1,4 @@
+# DEVELOPMENT: block all crawlers until launch.
+# Replace with a real robots.txt (and sitemap link) in Phase 8 / launch.
+User-agent: *
+Disallow: /
