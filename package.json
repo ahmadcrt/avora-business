@@ -1,0 +1,14 @@
+{
+  "name": "avora-business",
+  "version": "0.1.0",
+  "private": true,
+  "description": "AVORA Business by AVORA Technologies. Phase 1: project foundation.",
+  "type": "module",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "dev": "node scripts/dev-server.mjs",
+    "test": "node --test",
+    "check:secrets": "node scripts/check-secrets.mjs"
+  }
+}

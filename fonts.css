@@ -1,0 +1,22 @@
+/* Sora (headings) and Inter (body/UI). Both are open-source (SIL OFL).
+   ACTION REQUIRED: self-hosted font files are not in the repo yet.
+   Until they are added, the browser uses a locally installed copy or the
+   system fallback stack from tokens.css. See docs/DEVELOPMENT.md "Fonts".
+
+   When you add the woff2 files to assets/fonts/, add url() sources like:
+     src: local("Sora"), url("../fonts/Sora-Variable.woff2") format("woff2");
+   tests/structure.test.mjs verifies that every url() here points to a file. */
+@font-face {
+  font-family: "Sora";
+  font-style: normal;
+  font-weight: 100 800;
+  font-display: swap;
+  src: local("Sora");
+}
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: local("Inter");
+}

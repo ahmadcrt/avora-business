@@ -1,0 +1,3 @@
+-- Seed data for development and CI.
+-- Phase 1: intentionally empty. Reference data (categories, states, cities) arrives
+-- with the tables that need it. Never put real personal or business data in this file.
