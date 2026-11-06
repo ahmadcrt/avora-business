@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  static:
+    name: Static checks and unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Unit and structure tests
+        run: node --test
+      - name: Secret scan
+        run: node scripts/check-secrets.mjs
+      - name: Build with placeholder public config
+        run: node scripts/build.mjs
+        env:
+          AVORA_ENV: ci
+
+  database:
+    name: Database migrations and security tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # Runs a throwaway Supabase stack inside the CI runner (Docker is preinstalled on
+      # GitHub-hosted runners). No database password or service key is needed.
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      - name: Start local Supabase and apply migrations
+        run: supabase start
+      - name: Run database tests (pgTAP)
+        run: supabase test db
+      - name: Stop local Supabase
+        if: always()
+        run: supabase stop --no-backup
