@@ -1,0 +1,25 @@
+# Secrets and local environment: never commit these
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+secrets/
+supabase/.env
+supabase/.branches/
+supabase/.temp/
+supabase/functions/**/.env
+
+# Build output and dependencies
+dist/
+node_modules/
+coverage/
+
+# Editors and OS
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.log
