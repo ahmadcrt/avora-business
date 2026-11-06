@@ -6,7 +6,9 @@ select plan(17);
 -- Schemas -------------------------------------------------------------------
 select has_schema('private', 'private schema exists');
 select ok(not has_schema_privilege('anon', 'private', 'USAGE'), 'anon cannot use private schema');
-select ok(not has_schema_privilege('authenticated', 'private', 'USAGE'), 'authenticated cannot use private schema');
+-- Phase 2: authenticated needs USAGE so RLS policies can call private.is_admin(). It must still
+-- be unable to create objects there (function and table exposure is audited in 002_*.test.sql).
+select ok(has_schema_privilege('authenticated', 'private', 'USAGE') and not has_schema_privilege('authenticated', 'private', 'CREATE'), 'authenticated may use, but not create in, the private schema');
 select ok(has_schema_privilege('anon', 'public', 'USAGE'), 'anon can use public schema (API needs it)');
 select ok(not has_schema_privilege('anon', 'public', 'CREATE'), 'anon cannot create objects in public');
 select ok(not has_schema_privilege('authenticated', 'public', 'CREATE'), 'authenticated cannot create objects in public');
@@ -19,7 +21,7 @@ select is(
      join pg_namespace n on n.oid = c.relnamespace
     where n.nspname = 'public'
       and c.relkind in ('r', 'v', 'm', 'p', 'f')
-      and c.relname <> all (array[/* reviewed tables are added here in later phases */ '__none__'])
+      and c.relname <> all (array[/* reviewed tables are added here in later phases */ '__none__', 'profiles'])
       and (   has_table_privilege('anon', c.oid, 'SELECT, INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER')
            or has_table_privilege('authenticated', c.oid, 'SELECT, INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER'))),
   0,
