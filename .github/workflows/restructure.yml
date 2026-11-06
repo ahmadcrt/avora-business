@@ -1,0 +1,67 @@
+name: Restructure files (one-time)
+
+# One-time helper. Runs when this file is pushed to the phase-2-clean branch.
+# Moves the Phase 1 files from the repository root into their correct folders.
+# Delete this file afterwards.
+
+on:
+  push:
+    branches: [phase-2-clean]
+    paths: ['.github/workflows/restructure.yml']
+
+permissions:
+  contents: write
+
+jobs:
+  restructure:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Move files into folders
+        run: |
+          set -euo pipefail
+
+          move() {
+            src="$1"; dir="$2"
+            if [ -f "$src" ]; then
+              mkdir -p "$dir"
+              git mv "$src" "$dir/$src"
+              echo "moved: $src -> $dir/"
+            else
+              echo "skipped (not found): $src"
+            fi
+          }
+
+          for f in ARCHITECTURE.md DECISIONS.md DEVELOPMENT.md PHASE-1-REPORT.md SECURITY.md; do move "$f" docs; done
+          for f in avora-app-icon.svg avora-icon-dark-bg.svg avora-icon-light-bg.svg avora-logo-dark-bg.svg avora-logo-primary-light-bg.svg; do move "$f" logos; done
+          for f in base.css components.css fonts.css home.css styleguide.css tokens.css; do move "$f" assets/css; done
+          move config.js assets/js/core
+          for f in dom.js format.js safe.js; do move "$f" assets/js/lib; done
+          for f in build.mjs check-secrets.mjs dev-server.mjs lib-env.mjs; do move "$f" scripts; done
+          for f in build.test.mjs helpers.mjs lib.test.mjs migrations.test.mjs secrets.test.mjs structure.test.mjs; do move "$f" tests; done
+          for f in config.toml seed.sql; do move "$f" supabase; done
+          move 001_baseline_security.test.sql supabase/tests/database
+
+          # Baseline migration: keep the correctly named file, remove any mis-named duplicate.
+          for f in 20261104120000*; do
+            [ -e "$f" ] || continue
+            if [ "$f" = "20261104120000_baseline_security.sql" ]; then
+              move "$f" supabase/migrations
+            else
+              git rm -q -f -- "$f"
+              echo "removed mis-named duplicate: $f"
+            fi
+          done
+
+          echo "---- files still in the repository root:"
+          ls -1p | grep -v / || true
+
+          git add -A
+          if git diff --cached --quiet; then
+            echo "Nothing to commit."
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git commit -m "Move Phase 1 files into their folders"
+            if git remote get-url origin >/dev/null 2>&1; then git push; fi
+          fi
